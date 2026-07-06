@@ -73,6 +73,15 @@ const Dashboard = () => {
                                 {article.title}
                             </h3>
 
+                            <p
+                                className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mb-4 ${article.sentiment === "POSITIVE"
+                                        ? "bg-green-500/20 text-green-400"
+                                        : "bg-red-500/20 text-red-400"
+                                    }`}
+                            >
+                                {article.sentiment}
+                            </p>
+
                             <p className="text-gray-400 mb-4">
                                 Source: {article.source}
                             </p>
