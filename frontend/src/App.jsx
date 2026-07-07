@@ -16,43 +16,89 @@ function App() {
   const [market, setMarket] = useState({});
   const [news, setNews] = useState([]);
 
+  // AI CHAT STATES
+  const [message, setMessage] = useState("");
+  const [reply, setReply] = useState("");
+
   useEffect(() => {
     fetchMarket();
     fetchNews();
   }, []);
 
+  // FETCH MARKET DATA
   const fetchMarket = async () => {
-    const res = await axios.get("http://127.0.0.1:8000/market");
+    const res = await axios.get(
+      "http://127.0.0.1:8000/market"
+    );
+
     setMarket(res.data);
   };
 
+  // FETCH NEWS
   const fetchNews = async () => {
-    const res = await axios.get("http://127.0.0.1:8000/news");
+    const res = await axios.get(
+      "http://127.0.0.1:8000/news"
+    );
+
     setNews(res.data.news);
   };
 
+  // AI CHAT FUNCTION
+  const askAI = async () => {
+
+    try {
+
+      const res = await axios.post(
+        "http://127.0.0.1:8000/chat",
+        {
+          message: message,
+        }
+      );
+
+      setReply(res.data.reply);
+
+    } catch (error) {
+
+      console.log(error);
+
+      setReply(
+        "AI service is currently unavailable."
+      );
+    }
+  };
+
   return (
+
     <div className="app">
 
       {/* HEADER */}
       <div className="header">
+
         <h1>TradeMind AI</h1>
-        <p>AI Powered Market Intelligence Platform</p>
+
+        <p>
+          AI Powered Market Intelligence Platform
+        </p>
+
       </div>
 
       {/* MARKET DATA */}
       <div className="market-grid">
 
         <div className="card">
+
           <h2>NIFTY</h2>
 
           <h1>{market.NIFTY}</h1>
+
         </div>
 
         <div className="card">
+
           <h2>BANKNIFTY</h2>
 
           <h1>{market.BANKNIFTY}</h1>
+
         </div>
 
       </div>
@@ -62,7 +108,10 @@ function App() {
 
         <h2>NIFTY Trend</h2>
 
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer
+          width="100%"
+          height={300}
+        >
 
           <LineChart
             data={[
@@ -116,9 +165,11 @@ function App() {
             >
 
               <div>
+
                 <h3>{stock.name}</h3>
 
                 <p>₹{stock.price}</p>
+
               </div>
 
               <h3 className="green">
@@ -146,9 +197,11 @@ function App() {
             >
 
               <div>
+
                 <h3>{stock.name}</h3>
 
                 <p>₹{stock.price}</p>
+
               </div>
 
               <h3 className="red">
@@ -160,6 +213,42 @@ function App() {
           ))}
 
         </div>
+
+      </div>
+
+      {/* AI CHAT SECTION */}
+      <div className="card ai-chat">
+
+        <h2>
+          AI Market Assistant
+        </h2>
+
+        <div className="chat-box">
+
+          <input
+            type="text"
+            placeholder="Ask about market trends..."
+            value={message}
+            onChange={(e) =>
+              setMessage(e.target.value)
+            }
+          />
+
+          <button onClick={askAI}>
+            Ask AI
+          </button>
+
+        </div>
+
+        {reply && (
+
+          <div className="ai-reply">
+
+            <p>{reply}</p>
+
+          </div>
+
+        )}
 
       </div>
 

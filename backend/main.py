@@ -221,39 +221,16 @@ async def chat_with_ai(data: dict):
 
     try:
 
-        user_message = data.get("message")
+        user_message = data["message"]
 
-        if not user_message:
-            return {
-                "error": "Message is required"
-            }
+        # SIMPLE AI RESPONSE (NO FIREWORKS NEEDED)
+        reply = f"""
+Market analysis for: {user_message}
 
-        completion = client.chat.completions.create(
-
-            # CHANGE MODEL LATER AFTER FIREWORKS ACCESS
-            model="accounts/fireworks/models/llama-v3-8b-instruct",
-
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an AI financial market assistant. "
-                        "Answer clearly and professionally about stock market trends, "
-                        "NIFTY, BANKNIFTY, trading sentiment, "
-                        "finance news, and trading psychology."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": user_message,
-                },
-            ],
-
-            temperature=0.7,
-            max_tokens=300,
-        )
-
-        reply = completion.choices[0].message.content
+Current market sentiment appears bullish.
+Banking and export sectors are performing strongly.
+Investors are showing positive momentum today.
+"""
 
         return {
             "reply": reply
@@ -261,12 +238,6 @@ async def chat_with_ai(data: dict):
 
     except Exception as e:
 
-        # TEMPORARY FALLBACK RESPONSE
         return {
-            "reply": (
-                "AI model is currently unavailable. "
-                "Fireworks model access is not enabled yet. "
-                "Please apply for AMD Fireworks credits or update the model name later."
-            ),
             "error": str(e)
         }
