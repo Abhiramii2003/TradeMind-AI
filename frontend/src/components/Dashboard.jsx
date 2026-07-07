@@ -1,123 +1,223 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 
-const Dashboard = () => {
+function Dashboard() {
+
     const [marketData, setMarketData] = useState(null);
     const [news, setNews] = useState([]);
 
     useEffect(() => {
-        fetchMarketData();
-        fetchNews();
+
+        fetch("http://127.0.0.1:8000/market")
+            .then((res) => res.json())
+            .then((data) => setMarketData(data));
+
+        fetch("http://127.0.0.1:8000/news")
+            .then((res) => res.json())
+            .then((data) => setNews(data.news));
+
     }, []);
 
-    const fetchMarketData = async () => {
-        try {
-            const response = await axios.get("http://127.0.0.1:8000/market");
-            setMarketData(response.data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const fetchNews = async () => {
-        try {
-            const response = await axios.get("http://127.0.0.1:8000/news");
-            setNews(response.data.news);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    if (!marketData) {
+        return (
+            <div className="text-white p-10">
+                Loading...
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-[#0B1120] text-white px-6 py-8">
+        <div className="min-h-screen bg-[#0B1120] text-white p-8">
 
             {/* HEADER */}
-            <div className="mb-10">
-                <h1 className="text-5xl font-bold mb-3">
+            <div className="text-center mb-12">
+
+                <h1 className="text-6xl font-bold mb-4">
                     TradeMind AI
                 </h1>
 
-                <p className="text-gray-400 text-lg">
+                <p className="text-gray-400 text-xl">
                     AI Powered Market Intelligence Platform
                 </p>
+
             </div>
 
-            {/* MARKET SECTION */}
-            {marketData && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {/* MARKET CARDS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 
-                    <div className="bg-[#111827] p-8 rounded-2xl border border-gray-800 shadow-xl">
-                        <p className="text-gray-400 text-lg mb-3">
-                            NIFTY
-                        </p>
+                <div className="bg-[#111827] p-8 rounded-2xl border border-gray-800 shadow-lg">
 
-                        <h2 className="text-5xl font-bold text-green-400">
-                            {marketData.NIFTY}
-                        </h2>
-                    </div>
+                    <h2 className="text-gray-400 text-xl mb-2">
+                        NIFTY
+                    </h2>
 
-                    <div className="bg-[#111827] p-8 rounded-2xl border border-gray-800 shadow-xl">
-                        <p className="text-gray-400 text-lg mb-3">
-                            BANKNIFTY
-                        </p>
-
-                        <h2 className="text-5xl font-bold text-blue-400">
-                            {marketData.BANKNIFTY}
-                        </h2>
-                    </div>
+                    <p className="text-5xl font-bold text-green-400">
+                        {marketData.NIFTY}
+                    </p>
 
                 </div>
-            )}
 
-            {/* NEWS SECTION */}
-            <div>
+                <div className="bg-[#111827] p-8 rounded-2xl border border-gray-800 shadow-lg">
+
+                    <h2 className="text-gray-400 text-xl mb-2">
+                        BANKNIFTY
+                    </h2>
+
+                    <p className="text-5xl font-bold text-blue-400">
+                        {marketData.BANKNIFTY}
+                    </p>
+
+                </div>
+
+            </div>
+
+            {/* MARKET MOVERS */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+
+                {/* GAINERS */}
+                <div className="bg-[#111827] p-6 rounded-2xl border border-gray-800">
+
+                    <h2 className="text-2xl font-bold mb-5 text-green-400">
+                        Top Gainers
+                    </h2>
+
+                    {marketData.gainers.map((stock, index) => (
+
+                        <div
+                            key={index}
+                            className="flex justify-between py-3 border-b border-gray-800"
+                        >
+
+                            <span>{stock.name}</span>
+
+                            <div className="text-right">
+
+                                <p>₹{stock.price}</p>
+
+                                <p className="text-green-400">
+                                    {stock.change}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    ))}
+
+                </div>
+
+                {/* LOSERS */}
+                <div className="bg-[#111827] p-6 rounded-2xl border border-gray-800">
+
+                    <h2 className="text-2xl font-bold mb-5 text-red-400">
+                        Top Losers
+                    </h2>
+
+                    {marketData.losers.map((stock, index) => (
+
+                        <div
+                            key={index}
+                            className="flex justify-between py-3 border-b border-gray-800"
+                        >
+
+                            <span>{stock.name}</span>
+
+                            <div className="text-right">
+
+                                <p>₹{stock.price}</p>
+
+                                <p className="text-red-400">
+                                    {stock.change}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    ))}
+
+                </div>
+
+                {/* WATCHLIST */}
+                <div className="bg-[#111827] p-6 rounded-2xl border border-gray-800">
+
+                    <h2 className="text-2xl font-bold mb-5 text-blue-400">
+                        Watchlist
+                    </h2>
+
+                    {marketData.watchlist.map((stock, index) => (
+
+                        <div
+                            key={index}
+                            className="flex justify-between py-3 border-b border-gray-800"
+                        >
+
+                            <span>{stock.name}</span>
+
+                            <p>₹{stock.price}</p>
+
+                        </div>
+
+                    ))}
+
+                </div>
+
+            </div>
+
+            {/* NEWS */}
+            <div className="bg-[#111827] p-8 rounded-2xl border border-gray-800">
+
                 <h2 className="text-3xl font-bold mb-8">
                     Market Intelligence Feed
                 </h2>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-6">
 
-                    {news.map((article, index) => (
+                    {news.map((item, index) => (
+
                         <div
                             key={index}
-                            className="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg hover:scale-[1.02] transition duration-300"
+                            className="border-b border-gray-800 pb-5"
                         >
-                            <h3 className="text-xl font-semibold leading-relaxed mb-5">
-                                {article.title}
+
+                            <h3 className="text-xl font-semibold mb-2">
+                                {item.title}
                             </h3>
 
-                            <div className="flex items-center justify-between mb-5">
+                            <div className="flex items-center gap-4 mb-3">
 
                                 <span className="text-gray-400">
-                                    {article.source}
+                                    {item.source}
                                 </span>
 
                                 <span
-                                    className={`px-3 py-1 rounded-full text-sm font-semibold ${article.sentiment === "POSITIVE"
-                                        ? "bg-green-500/20 text-green-400"
-                                        : "bg-red-500/20 text-red-400"
+                                    className={`font-bold ${item.sentiment === "POSITIVE"
+                                        ? "text-green-400"
+                                        : "text-red-400"
                                         }`}
                                 >
-                                    {article.sentiment}
+                                    {item.sentiment}
                                 </span>
 
                             </div>
 
                             <a
-                                href={article.url}
+                                href={item.url}
                                 target="_blank"
-                                rel="noreferrer"
-                                className="text-blue-400 hover:text-blue-300 transition"
+                                className="text-blue-400 hover:underline"
                             >
                                 Read Full Article →
                             </a>
+
                         </div>
+
                     ))}
 
                 </div>
+
             </div>
+
         </div>
     );
-};
+}
 
 export default Dashboard;
