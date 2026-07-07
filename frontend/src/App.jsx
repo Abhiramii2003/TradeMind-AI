@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import "./App.css";
+
 import {
   LineChart,
   Line,
@@ -7,105 +10,94 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
-import "./App.css";
-
 function App() {
 
-  const [market, setMarket] = useState({});
+  const [market, setMarket] = useState(null);
+
   const [news, setNews] = useState([]);
 
-  // AI CHAT STATES
-  const [message, setMessage] = useState("");
-  const [reply, setReply] = useState("");
+  const [question, setQuestion] = useState("");
 
-  // LOADING STATE
-  const [loading, setLoading] = useState(false);
+  const [aiReply, setAiReply] = useState("");
 
-  // AUTO REFRESH MARKET DATA
+
+  // ====================================
+  // FETCH MARKET DATA
+  // ====================================
+
   useEffect(() => {
 
-    fetchMarket();
-    fetchNews();
-
-    const interval = setInterval(() => {
-      fetchMarket();
-    }, 5000);
-
-    return () => clearInterval(interval);
+    fetch("http://127.0.0.1:8000/market")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("MARKET DATA:", data);
+        setMarket(data);
+      });
 
   }, []);
 
-  // FETCH MARKET DATA
-  const fetchMarket = async () => {
 
-    try {
-
-      const res = await axios.get(
-        "http://127.0.0.1:8000/market"
-      );
-
-      setMarket(res.data);
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
-  };
-
+  // ====================================
   // FETCH NEWS
-  const fetchNews = async () => {
+  // ====================================
 
-    try {
+  useEffect(() => {
 
-      const res = await axios.get(
-        "http://127.0.0.1:8000/news"
-      );
+    fetch("http://127.0.0.1:8000/news")
+      .then((res) => res.json())
+      .then((data) => {
+        setNews(data.news || []);
+      });
 
-      setNews(res.data.news);
+  }, []);
 
-    } catch (error) {
 
-      console.log(error);
+  // ====================================
+  // AI CHAT
+  // ====================================
 
-    }
-  };
-
-  // AI CHAT FUNCTION
   const askAI = async () => {
 
-    setLoading(true);
+    const response = await fetch(
+      "http://127.0.0.1:8000/chat",
+      {
+        method: "POST",
 
-    try {
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-      const res = await axios.post(
-        "http://127.0.0.1:8000/chat",
-        {
-          message: message,
-        }
-      );
+        body: JSON.stringify({
+          message: question,
+        }),
+      }
+    );
 
-      setReply(res.data.reply);
+    const data = await response.json();
 
-    } catch (error) {
-
-      console.log(error);
-
-      setReply(
-        "AI service is currently unavailable."
-      );
-    }
-
-    setLoading(false);
+    setAiReply(data.reply);
   };
+
+
+  // ====================================
+  // CHART DATA
+  // ====================================
+
+  const chartData = [
+    { time: "9AM", value: 24300 },
+    { time: "10AM", value: 24350 },
+    { time: "11AM", value: 24400 },
+    { time: "12PM", value: 24420 },
+    { time: "1PM", value: 24450 },
+  ];
+
 
   return (
 
     <div className="app">
 
       {/* HEADER */}
+
       <div className="header">
 
         <h1>TradeMind AI</h1>
@@ -116,29 +108,38 @@ function App() {
 
       </div>
 
-      {/* MARKET DATA */}
+
+      {/* MARKET CARDS */}
+
       <div className="market-grid">
 
         <div className="card">
 
           <h2>NIFTY</h2>
 
-          <h1>{market.NIFTY}</h1>
+          <h1>
+            {market?.nifty || "Loading..."}
+          </h1>
 
         </div>
+
 
         <div className="card">
 
           <h2>BANKNIFTY</h2>
 
-          <h1>{market.BANKNIFTY}</h1>
+          <h1>
+            {market?.banknifty || "Loading..."}
+          </h1>
 
         </div>
 
       </div>
 
-      {/* NIFTY TREND CHART */}
-      <div className="card chart-card">
+
+      {/* CHART */}
+
+      <div className="chart-card">
 
         <h2>NIFTY Trend</h2>
 
@@ -147,31 +148,18 @@ function App() {
           height={300}
         >
 
-          <LineChart
-            data={[
-              { time: "9AM", value: 24100 },
-              { time: "10AM", value: 24220 },
-              { time: "11AM", value: 24300 },
-              { time: "12PM", value: 24270 },
-              { time: "1PM", value: 24398 },
-            ]}
-          >
+          <LineChart data={chartData}>
 
-            <XAxis
-              dataKey="time"
-              stroke="#94a3b8"
-            />
+            <XAxis dataKey="time" />
 
-            <YAxis
-              stroke="#94a3b8"
-            />
+            <YAxis />
 
             <Tooltip />
 
             <Line
               type="monotone"
               dataKey="value"
-              stroke="#38bdf8"
+              stroke="#00c3ff"
               strokeWidth={3}
             />
 
@@ -181,34 +169,31 @@ function App() {
 
       </div>
 
-      {/* STOCKS SECTION */}
-      <div className="stocks-section">
 
-        {/* TOP GAINERS */}
+      {/* GAINERS & LOSERS */}
+
+      <div className="market-grid">
+
         <div className="card">
 
           <h2 className="green">
             Top Gainers
           </h2>
 
-          {market.gainers?.map((stock, index) => (
+          {market?.gainers?.map((stock, index) => (
 
             <div
-              className="stock-row"
               key={index}
+              className="stock-item"
             >
 
-              <div>
+              <h3>{stock.name}</h3>
 
-                <h3>{stock.name}</h3>
+              <p>₹{stock.price}</p>
 
-                <p>₹{stock.price}</p>
-
-              </div>
-
-              <h3 className="green">
+              <span className="green">
                 {stock.change}
-              </h3>
+              </span>
 
             </div>
 
@@ -216,31 +201,27 @@ function App() {
 
         </div>
 
-        {/* TOP LOSERS */}
+
         <div className="card">
 
           <h2 className="red">
             Top Losers
           </h2>
 
-          {market.losers?.map((stock, index) => (
+          {market?.losers?.map((stock, index) => (
 
             <div
-              className="stock-row"
               key={index}
+              className="stock-item"
             >
 
-              <div>
+              <h3>{stock.name}</h3>
 
-                <h3>{stock.name}</h3>
+              <p>₹{stock.price}</p>
 
-                <p>₹{stock.price}</p>
-
-              </div>
-
-              <h3 className="red">
+              <span className="red">
                 {stock.change}
-              </h3>
+              </span>
 
             </div>
 
@@ -250,35 +231,65 @@ function App() {
 
       </div>
 
-      {/* AI CHAT SECTION */}
-      <div className="card ai-chat">
 
-        <h2>
-          AI Market Assistant
-        </h2>
+      {/* WATCHLIST */}
+
+      <div className="card">
+
+        <h2>Watchlist</h2>
+
+        <div className="watchlist">
+
+          {market?.watchlist?.map(
+            (stock, index) => (
+
+              <div
+                key={index}
+                className="watch-item"
+              >
+
+                <h3>{stock.name}</h3>
+
+                <p>₹{stock.price}</p>
+
+              </div>
+
+            )
+          )}
+
+        </div>
+
+      </div>
+
+
+      {/* AI CHAT */}
+
+      <div className="card">
+
+        <h2>AI Market Assistant</h2>
 
         <div className="chat-box">
 
           <input
             type="text"
             placeholder="Ask about market trends..."
-            value={message}
+            value={question}
             onChange={(e) =>
-              setMessage(e.target.value)
+              setQuestion(e.target.value)
             }
           />
 
           <button onClick={askAI}>
-            {loading ? "Analyzing..." : "Ask AI"}
+            Ask AI
           </button>
 
         </div>
 
-        {reply && (
+        {aiReply && (
 
-          <div className="ai-reply">
+          <div className="ai-response">
 
-            <p>{reply}</p>
+            {aiReply}
 
           </div>
 
@@ -286,8 +297,10 @@ function App() {
 
       </div>
 
-      {/* NEWS SECTION */}
-      <div className="news-section">
+
+      {/* NEWS */}
+
+      <div className="card">
 
         <h2>
           Market Intelligence Feed
@@ -296,39 +309,32 @@ function App() {
         {news.map((item, index) => (
 
           <div
-            className="news-card"
             key={index}
+            className="news-item"
           >
 
             <h3>{item.title}</h3>
 
-            <div className="news-footer">
+            <p>{item.source}</p>
 
-              <div>
+            <span
+              className={
+                item.sentiment === "POSITIVE"
+                  ? "green"
+                  : "red"
+              }
+            >
+              {item.sentiment}
+            </span>
 
-                <p>{item.source}</p>
+            <br />
 
-                <span
-                  className={
-                    item.sentiment === "POSITIVE"
-                      ? "green"
-                      : "red"
-                  }
-                >
-                  {item.sentiment}
-                </span>
-
-              </div>
-
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Read More
-              </a>
-
-            </div>
+            <a
+              href={item.url}
+              target="_blank"
+            >
+              Read More
+            </a>
 
           </div>
 

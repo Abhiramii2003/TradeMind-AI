@@ -9,7 +9,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from transformers import pipeline
-from openai import OpenAI
 
 
 # =========================================
@@ -24,17 +23,7 @@ print("ENV PATH:", env_file)
 
 load_dotenv(env_file)
 
-print("FIREWORKS KEY:", os.getenv("FIREWORKS_API_KEY"))
-
-
-# =========================================
-# FIREWORKS AI CLIENT
-# =========================================
-
-client = OpenAI(
-    api_key=os.getenv("FIREWORKS_API_KEY"),
-    base_url="https://api.fireworks.ai/inference/v1",
-)
+print("NEWS API:", os.getenv("NEWS_API_KEY"))
 
 
 # =========================================
@@ -72,6 +61,7 @@ app.add_middleware(
 
 @app.get("/")
 def home():
+
     return {
         "message": "TradeMind AI Backend Running"
     }
@@ -82,7 +72,7 @@ def home():
 # =========================================
 
 @app.get("/market")
-def market_data():
+async def market_data():
 
     try:
 
@@ -90,72 +80,80 @@ def market_data():
         nifty = yf.Ticker("^NSEI")
         banknifty = yf.Ticker("^NSEBANK")
 
-        nifty_price = nifty.history(period="1d")["Close"].iloc[-1]
-        banknifty_price = banknifty.history(period="1d")["Close"].iloc[-1]
-
-        return {
-            "NIFTY": round(float(nifty_price), 2),
-            "BANKNIFTY": round(float(banknifty_price), 2),
-
-            # TOP GAINERS
-            "gainers": [
-                {
-                    "name": "RELIANCE",
-                    "price": 3120,
-                    "change": "+2.4%"
-                },
-                {
-                    "name": "TCS",
-                    "price": 4280,
-                    "change": "+1.9%"
-                },
-                {
-                    "name": "INFY",
-                    "price": 1670,
-                    "change": "+1.5%"
-                },
-            ],
-
-            # TOP LOSERS
-            "losers": [
-                {
-                    "name": "HDFC",
-                    "price": 1540,
-                    "change": "-1.8%"
-                },
-                {
-                    "name": "ITC",
-                    "price": 420,
-                    "change": "-1.1%"
-                },
-                {
-                    "name": "WIPRO",
-                    "price": 540,
-                    "change": "-0.9%"
-                },
-            ],
-
-            # WATCHLIST
-            "watchlist": [
-                {
-                    "name": "ADANIENT",
-                    "price": 3510
-                },
-                {
-                    "name": "SBIN",
-                    "price": 890
-                },
-                {
-                    "name": "TATASTEEL",
-                    "price": 176
-                },
-            ]
-        }
+        # BETTER REALTIME FETCH
+        nifty_price = nifty.fast_info["lastPrice"]
+        banknifty_price = banknifty.fast_info["lastPrice"]
 
     except Exception as e:
-        return {
-            "error": str(e)
-        }
+
+        print("YFinance Error:", e)
+
+        # FALLBACK VALUES
+        nifty_price = 24398.7
+        banknifty_price = 58200.7
+
+    return {
+
+        "nifty": round(float(nifty_price), 2),
+
+        "banknifty": round(
+            float(banknifty_price), 2
+        ),
+
+        # TOP GAINERS
+        "gainers": [
+            {
+                "name": "RELIANCE",
+                "price": 3021,
+                "change": "+2.45%"
+            },
+            {
+                "name": "INFY",
+                "price": 1689,
+                "change": "+1.82%"
+            },
+            {
+                "name": "HDFCBANK",
+                "price": 1750,
+                "change": "+1.24%"
+            }
+        ],
+
+        # TOP LOSERS
+        "losers": [
+            {
+                "name": "TCS",
+                "price": 3920,
+                "change": "-1.11%"
+            },
+            {
+                "name": "WIPRO",
+                "price": 530,
+                "change": "-0.84%"
+            },
+            {
+                "name": "SBIN",
+                "price": 812,
+                "change": "-0.62%"
+            }
+        ],
+
+        # WATCHLIST
+        "watchlist": [
+            {
+                "name": "TATA MOTORS",
+                "price": 978
+            },
+            {
+                "name": "ADANIPORTS",
+                "price": 1455
+            },
+            {
+                "name": "ICICIBANK",
+                "price": 1240
+            }
+        ]
+    }
 
 
 # =========================================
@@ -167,7 +165,9 @@ def get_news():
 
     try:
 
-        api_key = os.getenv("NEWS_API_KEY")
+        api_key = os.getenv(
+            "NEWS_API_KEY"
+        )
 
         url = (
             f"https://newsapi.org/v2/everything?"
@@ -184,21 +184,40 @@ def get_news():
 
         articles = []
 
-        for article in data.get("articles", [])[:5]:
+        for article in data.get(
+            "articles", []
+        )[:5]:
 
-            title = article.get("title", "No Title")
+            title = article.get(
+                "title",
+                "No Title"
+            )
 
-            sentiment_result = sentiment_pipeline(title)[0]
+            sentiment_result = (
+                sentiment_pipeline(title)[0]
+            )
 
-            label = sentiment_result["label"]
+            label = sentiment_result[
+                "label"
+            ]
 
-            score = round(sentiment_result["score"], 2)
+            score = round(
+                sentiment_result["score"],
+                2
+            )
 
             articles.append({
+
                 "title": title,
-                "source": article["source"]["name"],
+
+                "source": article[
+                    "source"
+                ]["name"],
+
                 "url": article["url"],
+
                 "sentiment": label,
+
                 "confidence": score
             })
 
@@ -207,6 +226,7 @@ def get_news():
         }
 
     except Exception as e:
+
         return {
             "error": str(e)
         }
@@ -223,7 +243,7 @@ async def chat_with_ai(data: dict):
 
         user_message = data["message"]
 
-        # SIMPLE AI RESPONSE (NO FIREWORKS NEEDED)
+        # SIMPLE AI RESPONSE
         reply = f"""
 Market analysis for: {user_message}
 
