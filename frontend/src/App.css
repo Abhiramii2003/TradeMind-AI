@@ -95,3 +95,7 @@ body {
 .red {
   color: #ef4444;
 }
+
+.chart-card {
+  margin-bottom: 40px;
+}
