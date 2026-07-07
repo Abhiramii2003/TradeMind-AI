@@ -20,31 +20,63 @@ function App() {
   const [message, setMessage] = useState("");
   const [reply, setReply] = useState("");
 
+  // LOADING STATE
+  const [loading, setLoading] = useState(false);
+
+  // AUTO REFRESH MARKET DATA
   useEffect(() => {
+
     fetchMarket();
     fetchNews();
+
+    const interval = setInterval(() => {
+      fetchMarket();
+    }, 5000);
+
+    return () => clearInterval(interval);
+
   }, []);
 
   // FETCH MARKET DATA
   const fetchMarket = async () => {
-    const res = await axios.get(
-      "http://127.0.0.1:8000/market"
-    );
 
-    setMarket(res.data);
+    try {
+
+      const res = await axios.get(
+        "http://127.0.0.1:8000/market"
+      );
+
+      setMarket(res.data);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
   };
 
   // FETCH NEWS
   const fetchNews = async () => {
-    const res = await axios.get(
-      "http://127.0.0.1:8000/news"
-    );
 
-    setNews(res.data.news);
+    try {
+
+      const res = await axios.get(
+        "http://127.0.0.1:8000/news"
+      );
+
+      setNews(res.data.news);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
   };
 
   // AI CHAT FUNCTION
   const askAI = async () => {
+
+    setLoading(true);
 
     try {
 
@@ -65,6 +97,8 @@ function App() {
         "AI service is currently unavailable."
       );
     }
+
+    setLoading(false);
   };
 
   return (
@@ -235,7 +269,7 @@ function App() {
           />
 
           <button onClick={askAI}>
-            Ask AI
+            {loading ? "Analyzing..." : "Ask AI"}
           </button>
 
         </div>
