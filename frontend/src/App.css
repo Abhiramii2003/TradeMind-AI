@@ -99,3 +99,41 @@ body {
 .chart-card {
   margin-bottom: 40px;
 }
+
+.ai-chat {
+  margin-bottom: 40px;
+}
+
+.chat-box {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.chat-box input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #0f172a;
+  color: white;
+  font-size: 16px;
+}
+
+.chat-box button {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  background: #38bdf8;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.ai-reply {
+  margin-top: 20px;
+  background: #0f172a;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 5px solid #38bdf8;
+}

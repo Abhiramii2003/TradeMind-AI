@@ -8,7 +8,7 @@ import requests
 from pathlib import Path
 from dotenv import load_dotenv
 
-from transformers import pipeline
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
 # =========================================
@@ -16,13 +16,11 @@ from transformers import pipeline
 # =========================================
 
 BASE_DIR = Path(__file__).resolve().parent
-
 env_file = BASE_DIR / ".env"
-
-print("ENV PATH:", env_file)
 
 load_dotenv(env_file)
 
+print("ENV PATH:", env_file)
 print("NEWS API:", os.getenv("NEWS_API_KEY"))
 
 
@@ -34,16 +32,14 @@ app = FastAPI()
 
 
 # =========================================
-# SENTIMENT ANALYSIS MODEL
+# SENTIMENT ANALYZER
 # =========================================
 
-sentiment_pipeline = pipeline(
-    "sentiment-analysis"
-)
+analyzer = SentimentIntensityAnalyzer()
 
 
 # =========================================
-# CORS CONFIG
+# CORS
 # =========================================
 
 app.add_middleware(
@@ -61,46 +57,41 @@ app.add_middleware(
 
 @app.get("/")
 def home():
-
     return {
         "message": "TradeMind AI Backend Running"
     }
 
 
 # =========================================
-# MARKET DATA ROUTE
+# MARKET DATA
 # =========================================
 
 @app.get("/market")
 async def market_data():
 
     try:
-
-        # LIVE MARKET DATA
         nifty = yf.Ticker("^NSEI")
         banknifty = yf.Ticker("^NSEBANK")
 
-        # BETTER REALTIME FETCH
-        nifty_price = nifty.fast_info["lastPrice"]
-        banknifty_price = banknifty.fast_info["lastPrice"]
+        nifty_price = nifty.fast_info.get("lastPrice")
+        banknifty_price = banknifty.fast_info.get("lastPrice")
+
+        if nifty_price is None:
+            nifty_price = 24398.70
+
+        if banknifty_price is None:
+            banknifty_price = 58200.70
 
     except Exception as e:
-
         print("YFinance Error:", e)
 
-        # FALLBACK VALUES
-        nifty_price = 24398.7
-        banknifty_price = 58200.7
+        nifty_price = 24398.70
+        banknifty_price = 58200.70
 
     return {
-
         "nifty": round(float(nifty_price), 2),
+        "banknifty": round(float(banknifty_price), 2),
 
-        "banknifty": round(
-            float(banknifty_price), 2
-        ),
-
-        # TOP GAINERS
         "gainers": [
             {
                 "name": "RELIANCE",
@@ -119,7 +110,6 @@ async def market_data():
             }
         ],
 
-        # TOP LOSERS
         "losers": [
             {
                 "name": "TCS",
@@ -138,7 +128,6 @@ async def market_data():
             }
         ],
 
-        # WATCHLIST
         "watchlist": [
             {
                 "name": "TATA MOTORS",
@@ -157,7 +146,7 @@ async def market_data():
 
 
 # =========================================
-# FINANCIAL NEWS + SENTIMENT ROUTE
+# NEWS + SENTIMENT
 # =========================================
 
 @app.get("/news")
@@ -165,60 +154,43 @@ def get_news():
 
     try:
 
-        api_key = os.getenv(
-            "NEWS_API_KEY"
-        )
+        api_key = os.getenv("NEWS_API_KEY")
 
         url = (
             f"https://newsapi.org/v2/everything?"
             f"q=NIFTY OR BANKNIFTY OR stock market OR Sensex OR NSE India&"
             f"language=en&"
             f"sortBy=publishedAt&"
-            f"domains=economictimes.indiatimes.com,moneycontrol.com,business-standard.com,cnbctv18.com&"
+            f"pageSize=5&"
             f"apiKey={api_key}"
         )
 
         response = requests.get(url)
-
         data = response.json()
 
         articles = []
 
-        for article in data.get(
-            "articles", []
-        )[:5]:
+        for article in data.get("articles", []):
 
-            title = article.get(
-                "title",
-                "No Title"
-            )
+            title = article.get("title", "No Title")
 
-            sentiment_result = (
-                sentiment_pipeline(title)[0]
-            )
+            score = analyzer.polarity_scores(title)
 
-            label = sentiment_result[
-                "label"
-            ]
+            compound = score["compound"]
 
-            score = round(
-                sentiment_result["score"],
-                2
-            )
+            if compound >= 0.05:
+                sentiment = "POSITIVE"
+            elif compound <= -0.05:
+                sentiment = "NEGATIVE"
+            else:
+                sentiment = "NEUTRAL"
 
             articles.append({
-
                 "title": title,
-
-                "source": article[
-                    "source"
-                ]["name"],
-
+                "source": article["source"]["name"],
                 "url": article["url"],
-
-                "sentiment": label,
-
-                "confidence": score
+                "sentiment": sentiment,
+                "confidence": abs(round(compound, 2))
             })
 
         return {
@@ -226,14 +198,13 @@ def get_news():
         }
 
     except Exception as e:
-
         return {
             "error": str(e)
         }
 
 
 # =========================================
-# AI MARKET CHAT ASSISTANT
+# AI CHAT
 # =========================================
 
 @app.post("/chat")
@@ -241,23 +212,22 @@ async def chat_with_ai(data: dict):
 
     try:
 
-        user_message = data["message"]
+        user_message = data.get("message", "")
 
-        # SIMPLE AI RESPONSE
         reply = f"""
-Market analysis for: {user_message}
+Market Analysis for: {user_message}
 
-Current market sentiment appears bullish.
-Banking and export sectors are performing strongly.
-Investors are showing positive momentum today.
+• Current market sentiment appears bullish.
+• Banking sector is showing strength.
+• Export-oriented stocks are gaining momentum.
+• Investors are actively buying quality large-cap stocks.
 """
 
         return {
-            "reply": reply
+            "reply": reply.strip()
         }
 
     except Exception as e:
-
         return {
             "error": str(e)
         }
