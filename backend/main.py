@@ -132,7 +132,7 @@ def set_cached_data(key, data):
 
 @app.get("/market")
 async def market_data():
-    cached = get_cached_data("market", 30)
+    cached = get_cached_data("market", 60)
     if cached:
         return cached
 
@@ -173,11 +173,16 @@ async def market_data():
         
         # Movers & Breadth
         NIFTY_50_TICKERS = [
-            "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS",
-            "SBIN.NS", "BHARTIARTL.NS", "ITC.NS", "LT.NS", "BAJFINANCE.NS",
-            "HINDUNILVR.NS", "AXISBANK.NS", "KOTAKBANK.NS", "ASIANPAINT.NS", "TATAMOTORS.NS",
-            "SUNPHARMA.NS", "M&M.NS", "MARUTI.NS", "TATASTEEL.NS", "BAJAJFINSV.NS",
-            "HCLTECH.NS", "ADANIPORTS.NS", "TITAN.NS", "POWERGRID.NS", "NTPC.NS"
+            "ADANIENT.NS", "ADANIPORTS.NS", "APOLLOHOSP.NS", "ASIANPAINT.NS", "AXISBANK.NS",
+            "BAJAJ-AUTO.NS", "BAJFINANCE.NS", "BAJAJFINSV.NS", "BPCL.NS", "BHARTIARTL.NS",
+            "BRITANNIA.NS", "CIPLA.NS", "COALINDIA.NS", "DIVISLAB.NS", "DRREDDY.NS",
+            "EICHERMOT.NS", "GRASIM.NS", "HCLTECH.NS", "HDFCBANK.NS", "HDFCLIFE.NS",
+            "HEROMOTOCO.NS", "HINDALCO.NS", "HINDUNILVR.NS", "ICICIBANK.NS", "ITC.NS",
+            "INDUSINDBK.NS", "INFY.NS", "JSWSTEEL.NS", "KOTAKBANK.NS", "LTIM.NS",
+            "LT.NS", "M&M.NS", "MARUTI.NS", "NTPC.NS", "NESTLEIND.NS",
+            "ONGC.NS", "POWERGRID.NS", "RELIANCE.NS", "SBILIFE.NS", "SBIN.NS",
+            "SUNPHARMA.NS", "TATAMOTORS.NS", "TATASTEEL.NS", "TCS.NS", "TATACONSUM.NS",
+            "TECHM.NS", "TITAN.NS", "ULTRACEMCO.NS", "WIPRO.NS", "SHRIRAMFIN.NS"
         ]
         
         tickers = yf.Tickers(" ".join(NIFTY_50_TICKERS))
@@ -185,12 +190,15 @@ async def market_data():
         advances = 0
         declines = 0
         unchanged = 0
+        failed_symbols = []
+        
         for symbol in NIFTY_50_TICKERS:
             try:
                 info = tickers.tickers[symbol].fast_info
                 last_price = info.get("lastPrice")
                 prev_close = info.get("previousClose")
-                if last_price and prev_close and last_price > 0 and prev_close > 0:
+                
+                if last_price is not None and prev_close is not None and last_price > 0 and prev_close > 0:
                     change_pct = ((last_price - prev_close) / prev_close) * 100
                     if change_pct > 0:
                         advances += 1
@@ -205,8 +213,11 @@ async def market_data():
                         "change": f"{'+' if change_pct >= 0 else ''}{round(float(change_pct), 2)}%",
                         "change_val": float(change_pct)
                     })
-            except Exception:
-                pass
+                else:
+                    failed_symbols.append(symbol)
+            except Exception as e:
+                print(f"Failed to fetch {symbol}: {e}")
+                failed_symbols.append(symbol)
                 
         gainers_list = sorted([m for m in movers if m["change_val"] > 0], key=lambda x: x["change_val"], reverse=True)
         losers_list = sorted([m for m in movers if m["change_val"] < 0], key=lambda x: x["change_val"])
@@ -231,13 +242,29 @@ async def market_data():
         except:
             pass
 
+        tracked = advances + declines + unchanged
+        if tracked >= 48:
+            data_quality = "GOOD"
+        elif tracked >= 40:
+            data_quality = "DEGRADED"
+        else:
+            data_quality = "POOR"
+
         result = {
             "NIFTY": round(float(nifty_price), 2),
             "SENSEX": round(float(sensex_price), 2),
             "BANKNIFTY": round(float(banknifty_price), 2),
             "VIX": round(float(vix_price), 2),
             "sectors": sectors_data,
-            "breadth": {"advances": advances, "declines": declines, "unchanged": unchanged, "total": advances + declines + unchanged},
+            "breadth": {
+                "advances": advances,
+                "declines": declines,
+                "unchanged": unchanged,
+                "tracked": tracked,
+                "expected": len(NIFTY_50_TICKERS),
+                "failed_symbols": failed_symbols
+            },
+            "data_quality": data_quality,
             "fii_dii": fii_dii,
             "fii_dii_date": fii_dii_date,
             "gainers": gainers,
@@ -258,7 +285,7 @@ async def market_data():
 @app.get("/watchlist")
 async def fetch_watchlist(symbols: str):
     cache_key = f"watchlist_{symbols}"
-    cached = get_cached_data(cache_key, 30)
+    cached = get_cached_data(cache_key, 60)
     if cached:
         return cached
 
@@ -345,7 +372,7 @@ async def search_stock(symbol: str):
 @app.get("/chart/{index}")
 async def chart_data(index: str):
     cache_key = f"chart_{index}"
-    cached = get_cached_data(cache_key, 30)
+    cached = get_cached_data(cache_key, 60)
     if cached:
         return cached
 
@@ -362,6 +389,9 @@ async def chart_data(index: str):
         t = yf.Ticker(symbol)
         df = t.history(period="1d", interval="5m")
         
+        if df.empty:
+            return {"error": f"No chart data found for {symbol}", "data": []}
+            
         chart_points = []
         for index_val, row in df.iterrows():
             time_str = index_val.strftime("%H:%M")

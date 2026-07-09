@@ -275,26 +275,64 @@ function Dashboard() {
 
                     {/* BREADTH */}
                     <div className={`${glassCard} p-8 flex flex-col justify-center`}>
-                        <h2 className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-5">Market Breadth</h2>
+                        <div className="flex flex-col mb-5">
+                            <h2 className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Market Breadth</h2>
+                            
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-xs text-slate-500 tracking-wide">Tracking {marketData.breadth.tracked}/{marketData.breadth.expected} NIFTY stocks</p>
+                                {marketData.data_quality && (
+                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                                        marketData.data_quality === 'GOOD' ? 'bg-emerald-500/20 text-emerald-400' :
+                                        marketData.data_quality === 'DEGRADED' ? 'bg-amber-500/20 text-amber-400' :
+                                        'bg-rose-500/20 text-rose-400'
+                                    }`}>
+                                        {marketData.data_quality}
+                                    </span>
+                                )}
+                            </div>
+
+                            {marketData.breadth.tracked < marketData.breadth.expected && (
+                                <div className="mt-2 relative group self-start">
+                                    <div className="text-xs font-medium text-amber-300 bg-amber-900/30 px-2 py-1 rounded border border-amber-500/20 cursor-help flex items-center gap-1">
+                                        <span>⚠</span> Live data available for {marketData.breadth.tracked}/{marketData.breadth.expected} stocks
+                                    </div>
+                                    
+                                    {marketData.breadth.failed_symbols && marketData.breadth.failed_symbols.length > 0 && (
+                                        <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl p-3 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-700 pb-1">Missing Symbols</p>
+                                            <div className="max-h-32 overflow-y-auto custom-scrollbar">
+                                                {marketData.breadth.failed_symbols.map((sym, i) => (
+                                                    <div key={i} className="text-xs text-rose-400 py-0.5 font-mono">{sym}</div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        
                         <div className="flex justify-between text-sm mb-3 font-bold tracking-wide">
                             <span className="text-emerald-400 drop-shadow-sm">{marketData.breadth.advances} Adv</span>
                             <span className="text-slate-400 drop-shadow-sm">{marketData.breadth.unchanged} Unc</span>
                             <span className="text-rose-400 drop-shadow-sm">{marketData.breadth.declines} Dec</span>
                         </div>
-                        <div className="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden flex shadow-inner border border-white/5">
-                            <div 
-                                className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-1000 shadow-[0_0_10px_rgba(52,211,153,0.5)]" 
-                                style={{ width: `${(marketData.breadth.advances / marketData.breadth.total) * 100}%` }}
-                            ></div>
-                            <div 
-                                className="bg-gradient-to-r from-slate-600 to-slate-400 h-full transition-all duration-1000" 
-                                style={{ width: `${(marketData.breadth.unchanged / marketData.breadth.total) * 100}%` }}
-                            ></div>
-                            <div 
-                                className="bg-gradient-to-l from-rose-600 to-rose-400 h-full transition-all duration-1000 shadow-[0_0_10px_rgba(244,63,94,0.5)]" 
-                                style={{ width: `${(marketData.breadth.declines / marketData.breadth.total) * 100}%` }}
-                            ></div>
-                        </div>
+                        
+                        {marketData.breadth.tracked >= 40 && (
+                            <div className="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden flex shadow-inner border border-white/5">
+                                <div 
+                                    className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full transition-all duration-1000 shadow-[0_0_10px_rgba(52,211,153,0.5)]" 
+                                    style={{ width: `${(marketData.breadth.advances / marketData.breadth.tracked) * 100}%` }}
+                                ></div>
+                                <div 
+                                    className="bg-gradient-to-r from-slate-600 to-slate-400 h-full transition-all duration-1000" 
+                                    style={{ width: `${(marketData.breadth.unchanged / marketData.breadth.tracked) * 100}%` }}
+                                ></div>
+                                <div 
+                                    className="bg-gradient-to-l from-rose-600 to-rose-400 h-full transition-all duration-1000 shadow-[0_0_10px_rgba(244,63,94,0.5)]" 
+                                    style={{ width: `${(marketData.breadth.declines / marketData.breadth.tracked) * 100}%` }}
+                                ></div>
+                            </div>
+                        )}
                     </div>
 
                     {/* FII DII */}

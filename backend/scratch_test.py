@@ -1,22 +1,6 @@
-import yfinance as yf
-
-def test():
-    indices = {
-        "NIFTY": "^NSEI",
-        "SENSEX": "^BSESN",
-        "BANKNIFTY": "^NSEBANK",
-        "VIX": "^INDIAVIX"
-    }
-    
-    for name, symbol in indices.items():
-        try:
-            info = yf.Ticker(symbol).fast_info
-            print(f"{name} fast_info lastPrice:", info.get("lastPrice"))
-            
-            info2 = yf.Ticker(symbol).info
-            print(f"{name} info currentPrice:", info2.get("currentPrice"))
-            print(f"{name} info regularMarketPrice:", info2.get("regularMarketPrice"))
-        except Exception as e:
-            print(f"{name} ERROR:", e)
-
-test()
+import urllib.request
+import re
+req = urllib.request.Request('https://en.wikipedia.org/wiki/NIFTY_50', headers={'User-Agent': 'Mozilla/5.0'})
+html = urllib.request.urlopen(req).read().decode('utf-8')
+matches = set(re.findall(r'<td><a rel="nofollow" class="external text" href="[^>]+>([^<]+)</a></td>', html))
+print(matches)
