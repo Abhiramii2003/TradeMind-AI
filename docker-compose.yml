@@ -5,6 +5,8 @@ services:
     container_name: trademind_backend
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env
     volumes:
       - ./backend:/app
 
