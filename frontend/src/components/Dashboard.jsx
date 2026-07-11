@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function Dashboard() {
     const navigate = useNavigate();
 
@@ -24,7 +26,7 @@ function Dashboard() {
     const [isRetrying, setIsRetrying] = useState(false);
 
     const fetchMarketData = () => {
-        fetch("http://127.0.0.1:8000/market")
+        fetch(`${API_URL}/market`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.error) {
@@ -42,7 +44,7 @@ function Dashboard() {
     };
 
     const fetchNewsData = () => {
-        fetch("http://127.0.0.1:8000/news")
+        fetch(`${API_URL}/news`)
             .then((res) => res.json())
             .then((data) => {
                 if (!data.error) setNews(data.news);
@@ -51,7 +53,7 @@ function Dashboard() {
     };
 
     const fetchChartData = (index) => {
-        fetch(`http://127.0.0.1:8000/chart/${index}`)
+        fetch(`${API_URL}/chart/${index}`)
             .then((res) => res.json())
             .then((data) => {
                 if (!data.error) setChartData(data.data || []);
@@ -64,7 +66,7 @@ function Dashboard() {
             setWatchlistData([]);
             return;
         }
-        fetch(`http://127.0.0.1:8000/watchlist?symbols=${symbols.join(",")}`)
+        fetch(`${API_URL}/watchlist?symbols=${symbols.join(",")}`)
             .then((res) => res.json())
             .then((data) => {
                 if (!data.error) setWatchlistData(data.data || []);
@@ -131,7 +133,7 @@ function Dashboard() {
         setChatHistory(prev => [...prev, { role: "user", text: userQ }]);
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/chat", {
+            const response = await fetch(`${API_URL}/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userQ }),

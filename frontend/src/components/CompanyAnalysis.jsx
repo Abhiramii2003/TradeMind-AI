@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function CompanyAnalysis() {
     const { symbol } = useParams();
     const navigate = useNavigate();
@@ -20,7 +22,7 @@ function CompanyAnalysis() {
         setError(null);
         
         // Fetch Fundamentals
-        fetch(`http://127.0.0.1:8000/search/${symbol}`)
+        fetch(`${API_URL}/search/${symbol}`)
             .then(res => res.json())
             .then(data => {
                 if(data.error) throw new Error(data.error);
@@ -29,7 +31,7 @@ function CompanyAnalysis() {
             .catch(err => setError(err.message));
 
         // Fetch Chart Data
-        fetch(`http://127.0.0.1:8000/chart/${symbol}`)
+        fetch(`${API_URL}/chart/${symbol}`)
             .then(res => res.json())
             .then(data => {
                 setChartData(data.data || []);
