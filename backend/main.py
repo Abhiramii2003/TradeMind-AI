@@ -427,7 +427,7 @@ def get_news():
             f"q=NIFTY OR BANKNIFTY OR stock market OR Sensex OR NSE India&"
             f"language=en&"
             f"sortBy=publishedAt&"
-            f"pageSize=5&"
+            f"pageSize=15&"
             f"apiKey={api_key}"
         )
 

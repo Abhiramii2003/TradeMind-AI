@@ -1,3 +1,4 @@
+
 # TradeMind AI 🧠📈
 
 **TradeMind AI** is an AI-powered market intelligence platform built for the Indian stock market ecosystem. It combines real-time market analytics, financial news sentiment analysis, institutional flow tracking, and an AI-powered market assistant into a single unified dashboard.
@@ -10,90 +11,86 @@ The platform is designed to help traders, investors, and students better underst
 
 ### 📊 Real-Time Market Dashboard
 
-* Live tracking of:
-
-  * NIFTY 50
-  * BSE SENSEX
-  * NIFTY BANK
-  * India VIX
-* Intraday 5-minute interval charts.
-* Real-time market snapshots powered by Yahoo Finance.
+- Live tracking of:
+  - NIFTY 50
+  - BSE SENSEX
+  - NIFTY BANK
+  - India VIX
+- Intraday 5-minute interval charts.
+- Real-time market snapshots powered by Yahoo Finance.
 
 ### 📈 Market Breadth Analytics
 
-* Tracks all NIFTY 50 constituents.
-* Displays:
-
-  * Advances
-  * Declines
-  * Unchanged stocks
-* Includes market data quality indicators and tracking statistics.
+- Tracks all NIFTY 50 constituents.
+- Displays:
+  - Advances
+  - Declines
+  - Unchanged stocks
+- Includes market data quality indicators and tracking statistics.
 
 ### 🔥 Sector Performance Heatmap
 
 Monitor sector-wise performance including:
 
-* IT
-* Banking
-* Pharma
-* FMCG
-* Metals
-* Auto
+- IT
+- Banking
+- Pharma
+- FMCG
+- Metals
+- Auto
 
 ### 🚀 Top Gainers & Losers
 
 Real-time identification of:
 
-* Top gaining stocks
-* Top losing stocks
-* Percentage movement
-* Live prices
+- Top gaining stocks
+- Top losing stocks
+- Percentage movement
+- Live prices
 
 ### ⭐ Dynamic Watchlists
 
-* Add any NSE stock to a personalized watchlist.
-* Real-time updates on:
-
-  * Price
-  * Percentage change
-  * Market movement
+- Add any NSE stock to a personalized watchlist.
+- Real-time updates on:
+  - Price
+  - Percentage change
+  - Market movement
 
 ### 📰 News Intelligence Feed
 
-* Live financial news aggregation.
-* Automatic sentiment classification:
-
-  * Positive
-  * Negative
-  * Neutral
-* VADER sentiment engine integration.
+- Live financial news aggregation.
+- Automatic sentiment classification:
+  - Positive
+  - Negative
+  - Neutral
+- VADER sentiment engine integration.
 
 ### 🤖 AI Market Assistant
 
 An AI-powered conversational assistant capable of:
 
-* Explaining market movements.
-* Analyzing sector trends.
-* Interpreting institutional flows.
-* Summarizing news sentiment.
-* Answering finance-related questions using live market context.
+- Explaining market movements.
+- Analyzing sector trends.
+- Interpreting institutional flows.
+- Summarizing news sentiment.
+- Answering finance-related questions using live market context.
 
 ### 💰 Institutional Flow Tracking
 
 Track daily:
 
-* Foreign Institutional Investors (FII/FPI)
-* Domestic Institutional Investors (DII)
+- Foreign Institutional Investors (FII/FPI)
+- Domestic Institutional Investors (DII)
 
 ### ⚡ Intelligent Backend Caching
 
-* Reduces Yahoo Finance rate limits.
-* Improves response times.
-* Enhances dashboard stability.
+- Reduces Yahoo Finance rate limits.
+- Improves response times.
+- Enhances dashboard stability.
 
 ---
 
-# 🏗️ System Architecture
+## 🏗️ System Architecture
 
 ```text
 React + Vite Frontend
@@ -109,38 +106,38 @@ Finance             LLM API
  │
  ▼
 VADER Sentiment Engine
-```
+
 
 ---
 
-# 🛠️ Technology Stack
+## 🛠️ Technology Stack
 
-## Frontend
+### Frontend
 
-* React 19
-* Vite
-* Tailwind CSS v4
-* React Router
-* Recharts
-* Axios
+- React 19
+- Vite
+- Tailwind CSS v4
+- React Router
+- Recharts
+- Axios
 
-## Backend
+### Backend
 
-* Python 3
-* FastAPI
-* yfinance
-* vaderSentiment
-* Fireworks AI API
-* NewsAPI
+- Python 3
+- FastAPI
+- yfinance
+- vaderSentiment
+- Fireworks AI API
+- NewsAPI
 
-## Infrastructure
+### Infrastructure
 
-* Docker
-* Docker Compose
+- Docker
+- Docker Compose
 
 ---
 
-# 📦 Project Structure
+## 📦 Project Structure
 
 ```text
 TradeMind-AI/
@@ -164,18 +161,18 @@ TradeMind-AI/
 
 ---
 
-# ⚙️ Installation & Setup
+## ⚙️ Installation & Setup
 
-## Option 1 — Docker (Recommended)
+### Option 1 — Docker (Recommended)
 
-### Clone Repository
+#### Clone Repository
 
 ```bash
 git clone https://github.com/Abhiramii2003/TradeMind-AI.git
 cd TradeMind-AI
 ```
 
-### Create Environment File
+#### Create Environment File
 
 Create:
 
@@ -190,13 +187,13 @@ FIREWORKS_API_KEY=your_fireworks_api_key
 NEWS_API_KEY=your_news_api_key
 ```
 
-### Start Containers
+#### Start Containers
 
 ```bash
 docker compose up --build
 ```
 
-### Access Application
+#### Access Application
 
 Frontend:
 
@@ -212,9 +209,9 @@ http://localhost:8000/docs
 
 ---
 
-## Option 2 — Manual Setup
+### Option 2 — Manual Setup
 
-### Backend
+#### Backend
 
 ```bash
 cd backend
@@ -247,7 +244,7 @@ uvicorn main:app --reload --port 8000
 
 ---
 
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
@@ -257,25 +254,25 @@ npm run dev
 
 ---
 
-# 🔌 API Endpoints
+## 🔌 API Endpoints
 
-## GET `/market`
-
-Returns:
-
-* Index values
-* Market breadth
-* Sector heatmap
-* Gainers and losers
-* FII/DII activity
-
-## GET `/watchlist`
+### GET `/market`
 
 Returns:
 
-* Real-time stock prices
-* Percentage changes
-* Watchlist analytics
+- Index values
+- Market breadth
+- Sector heatmap
+- Top gainers and losers
+- FII/DII activity
+
+### GET `/watchlist`
+
+Returns:
+
+- Real-time stock prices
+- Percentage changes
+- Watchlist analytics
 
 Example:
 
@@ -283,43 +280,43 @@ Example:
 /watchlist?symbols=RELIANCE,TCS,HDFCBANK,INFY
 ```
 
-## GET `/search/{symbol}`
+### GET `/search/{symbol}`
 
 Returns:
 
-* Company information
-* Key financial metrics
-* Market statistics
+- Company information
+- Key financial metrics
+- Market statistics
 
-## GET `/chart/{symbol}`
-
-Returns:
-
-* 5-minute interval intraday chart data.
-
-## GET `/news`
+### GET `/chart/{symbol}`
 
 Returns:
 
-* Financial news articles
-* Sentiment classification
+- 5-minute interval intraday chart data.
 
-## POST `/chat`
+### GET `/news`
 
-AI assistant endpoint.
+Returns:
+
+- Financial news articles
+- Sentiment classification.
+
+### POST `/chat`
+
+AI Assistant endpoint.
 
 Features:
 
-* Live market context injection
-* Financial Q&A
-* Sector analysis
-* Market explanations
+- Live market context injection
+- Financial Q&A
+- Sector analysis
+- Market explanations
 
 ---
 
-# 📸 Screenshots
+## 📸 Screenshots
 
-Add screenshots here before submission:
+Add screenshots before submission:
 
 ```text
 screenshots/dashboard.png
@@ -329,39 +326,41 @@ screenshots/market_breadth.png
 
 ---
 
-# 🎯 Example Questions for AI Assistant
+## 🎯 Example Questions for the AI Assistant
 
-* Why is the IT sector falling today?
-* Analyze Reliance Industries.
-* What is driving NIFTY weakness?
-* Explain current FII and DII flows.
-* Which sectors are outperforming today?
-
----
-
-# 🔮 Future Roadmap
-
-* Self-hosted LLM inference on AMD Developer Cloud GPUs.
-* Portfolio risk analytics.
-* AI-based Buy/Hold/Sell recommendations.
-* Predictive analytics using time-series forecasting models.
-* Financial document analysis using Retrieval Augmented Generation (RAG).
-* Personalized investment dashboards.
+- Why is the IT sector falling today?
+- Analyze Reliance Industries.
+- What is driving NIFTY weakness?
+- Explain current FII and DII flows.
+- Which sectors are outperforming today?
+- Summarize today's market sentiment.
 
 ---
 
-# 🏆 Hackathon Highlights
+## 🔮 Future Roadmap
 
-* AI-powered financial market assistant.
-* Full-stack architecture with FastAPI and React.
-* Dockerized deployment.
-* Real-time market intelligence workflows.
-* Designed for future scalability on AMD GPU infrastructure.
-* Approved for AMD Developer Cloud GPU credits.
+- Self-hosted LLM inference on AMD Developer Cloud GPUs.
+- Portfolio risk analytics.
+- AI-based Buy/Hold/Sell recommendations.
+- Predictive analytics using time-series forecasting models.
+- Financial document analysis using Retrieval-Augmented Generation (RAG).
+- Personalized investment dashboards.
 
 ---
 
-# 🤝 Contributing
+## 🏆 Hackathon Highlights
+
+- AI-powered financial market assistant.
+- Full-stack architecture with FastAPI and React.
+- Dockerized deployment.
+- Real-time market intelligence workflows.
+- Market breadth analytics covering all NIFTY 50 constituents.
+- Designed for future scalability on AMD GPU infrastructure.
+- Approved for AMD Developer Cloud GPU credits.
+
+---
+
+## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome.
 
@@ -369,20 +368,24 @@ Feel free to fork the repository and submit pull requests.
 
 ---
 
-# 📝 License
+## 📝 License
 
 This project is licensed under the MIT License.
 
 ---
 
-# 👩‍💻 Author
+## 👩‍💻 Author
 
 **Abhirami Aji**
 
-B.Tech Computer Science Engineering
+B.Tech Computer Science Engineering  
+College of Engineering Poonjar
 
-GitHub:
+GitHub:  
 https://github.com/Abhiramii2003
 
-Portfolio:
+Portfolio:  
 https://abhiramiportfolio.vercel.app/
+
+LinkedIn:  
+https://www.linkedin.com/in/abhirami-aji/
